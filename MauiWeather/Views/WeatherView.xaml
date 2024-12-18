@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:converters="clr-namespace:MauiWeather.Converters"
+             x:Class="MauiWeather.Views.WeatherView"
+             Title="WeatherView">
+
+    <ContentPage.Resources>
+        <converters:CodeToWeatherConverter x:Key="CodeToWeather"/>
+        <converters:CodeToLottieConverter x:Key="CodeToLottieConverter"/>
+    </ContentPage.Resources>
+    <Grid Margin="15" RowDefinitions="Auto,Auto,.3*,Auto,Auto">
+        <Grid>
+            <Border/>
+            <SearchBar Placeholder="Search" VerticalOptions="Center"
+                       x:Name="searchBar"
+                       BackgroundColor="White"
+                       SearchCommand="{Binding SearchCommand}"
+                       SearchCommandParameter="{Binding Source={x:Reference searchBar}, Path=Text}"/>
+        </Grid>
+        <VerticalStackLayout Grid.Row="1" Style="{StaticResource MainStackLayout}" IsVisible="{Binding IsVisible}">
+            <Label Text="{Binding PlaceName}" Style="{StaticResource Title}"/>
+            <Label Text="{Binding Date, StringFormat='{0:MMMM dd, yyyy}'}"/>
+        </VerticalStackLayout>
+        <skia:SKLottieView Grid.Row="2"
+                           RepeatCount="-1"
+                           Source="{Binding WeatherData.current_weather.weathercode, Converter={StaticResource CodeToLottieConverter}}"/>
+        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" IsVisible="{Binding IsVisible}">
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="Temp" Style="{StaticResource WeatherTitle}" />
+                <Label Text="{Binding Weather.current_weather.temperature, StringFormat='{0}°C'}" Style="{StaticResource WeatherValue}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="10">
+                <Label Text="Wind" Style="{StaticResource WeatherTitle}" />
+                <Label Text="{Binding WeatherData.current_weather.windspeed, StringFormat='{0}Km/h'}" Style="{StaticResource WeatherValue}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="10">
+                <Label Text="Weather" Style="{StaticResource WeatherTitle}" />
+                <Label Text="{Binding WeatherData.current_weather.weathercode, Converter={StaticResource CodeToWeather}}" Style="{StaticResource WeatherValue}"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <CollectionView Grid.Row="4" ItemsSource="{Binding WeatherData.daily2}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource card}" WidthRequest="100">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="25"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                            <skia:SKLottieView IsAnimationEnabled="False"
+                                               HeightRequest="50"
+                                               WidthRequest="50"
+                                               Source="{Binding weathercode, Converter={StaticResource CodeToLottieConverter}}"/>
+                            <Label Text="{Binding time}" TextColor="{StaticResource YellowAccent100}"/>
+                            <Label Text="{Binding temperature_2m_max, StringFormat='{0}°C'}"/>
+                            <Label Text="{Binding weathercode, Converter={StaticResource CodeToWeather}}"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid
+     Grid.RowSpan="5"
+     Margin="-15"
+     BackgroundColor="Black"
+     IsVisible="{Binding IsLoading}"
+     Opacity=".9">
+            <ActivityIndicator IsRunning="True" VerticalOptions="Center" />
+        </Grid>
+    </Grid>
+</ContentPage>
